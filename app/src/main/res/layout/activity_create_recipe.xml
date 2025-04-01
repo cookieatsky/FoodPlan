@@ -98,60 +98,56 @@
             android:layout_marginTop="8dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/cookingTimeLayout"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="16dp"
-            android:hint="Время приготовления (мин)"
-            app:layout_constraintEnd_toStartOf="@+id/servingsLayout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/descriptionLayout">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/cookingTimeEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cookingTimeLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:hint="Время приготовления (мин)">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/cookingTimeEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/caloriesLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="16dp"
-            android:hint="Калории"
-            app:layout_constraintEnd_toStartOf="@+id/servingsLayout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cookingTimeLayout">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/caloriesEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/caloriesLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:hint="Калории">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/caloriesEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/servingsLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Количество порций"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/cookingTimeLayout"
-            app:layout_constraintTop_toBottomOf="@+id/descriptionLayout">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/servingsEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/servingsLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                android:hint="Порций">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/servingsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
 
         <Button
             android:id="@+id/saveButton"

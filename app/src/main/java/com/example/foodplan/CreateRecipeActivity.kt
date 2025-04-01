@@ -108,6 +108,21 @@ class CreateRecipeActivity : AppCompatActivity() {
             return
         }
 
+        if (cookingTime <= 0) {
+            Toast.makeText(this, "Введите время приготовления", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (calories <= 0) {
+            Toast.makeText(this, "Введите количество калорий", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (servings <= 0) {
+            Toast.makeText(this, "Введите количество порций", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val recipe = Recipe(
             id = 0,
             name = name,
