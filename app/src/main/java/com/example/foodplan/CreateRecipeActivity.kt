@@ -102,6 +102,10 @@ class CreateRecipeActivity : AppCompatActivity() {
         val calories = binding.caloriesEditText.text.toString().toIntOrNull() ?: 0
         val servings = binding.servingsEditText.text.toString().toIntOrNull() ?: 1
         val imageUri = selectedImageUri?.toString()
+        val isBreakfast = binding.breakfastCheckBox.isChecked
+        val isLunch = binding.lunchCheckBox.isChecked
+        val isDinner = binding.dinnerCheckBox.isChecked
+        val isSnack = binding.snackCheckBox.isChecked
 
         if (name.isBlank()) {
             Toast.makeText(this, "Введите название рецепта", Toast.LENGTH_SHORT).show()
@@ -123,6 +127,11 @@ class CreateRecipeActivity : AppCompatActivity() {
             return
         }
 
+        if (!isBreakfast && !isLunch && !isDinner && !isSnack) {
+            Toast.makeText(this, "Выберите хотя бы один тип блюда", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val recipe = Recipe(
             id = 0,
             name = name,
@@ -132,7 +141,11 @@ class CreateRecipeActivity : AppCompatActivity() {
             servings = servings,
             imageUri = imageUri,
             ingredients = ingredientsAdapter.currentList.filter { it.isNotBlank() },
-            instructions = instructionsAdapter.currentList.filter { it.isNotBlank() }
+            instructions = instructionsAdapter.currentList.filter { it.isNotBlank() },
+            isBreakfast = isBreakfast,
+            isLunch = isLunch,
+            isDinner = isDinner,
+            isSnack = isSnack
         )
 
         lifecycleScope.launch {

@@ -1,24 +1,23 @@
 package com.example.foodplan.ui.recipes
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplan.R
-import com.example.foodplan.data.RecipeRepository
 import com.example.foodplan.model.Recipe
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class RecipeDetailsActivity : AppCompatActivity() {
+    private lateinit var recipeImageView: ImageView
     private lateinit var recipeNameTextView: TextView
     private lateinit var recipeDescriptionTextView: TextView
     private lateinit var cookingTimeTextView: TextView
+    private lateinit var caloriesTextView: TextView
+    private lateinit var servingsTextView: TextView
     private lateinit var ingredientsRecyclerView: RecyclerView
     private lateinit var instructionsRecyclerView: RecyclerView
     private lateinit var editButton: ExtendedFloatingActionButton
@@ -33,17 +32,15 @@ class RecipeDetailsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_recipe_details)
 
         // Получаем рецепт из Intent
-        recipe = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_RECIPE, Recipe::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(EXTRA_RECIPE)
-        }
+        recipe = intent.getParcelableExtra(EXTRA_RECIPE)
 
         // Инициализация views
+        recipeImageView = findViewById(R.id.recipeImageView)
         recipeNameTextView = findViewById(R.id.recipeNameTextView)
         recipeDescriptionTextView = findViewById(R.id.recipeDescriptionTextView)
         cookingTimeTextView = findViewById(R.id.cookingTimeTextView)
+        caloriesTextView = findViewById(R.id.caloriesTextView)
+        servingsTextView = findViewById(R.id.servingsTextView)
         ingredientsRecyclerView = findViewById(R.id.ingredientsRecyclerView)
         instructionsRecyclerView = findViewById(R.id.instructionsRecyclerView)
         editButton = findViewById(R.id.editButton)
@@ -75,6 +72,12 @@ class RecipeDetailsActivity : AppCompatActivity() {
             recipeNameTextView.text = it.name
             recipeDescriptionTextView.text = it.description
             cookingTimeTextView.text = "Время приготовления: ${it.cookingTime} мин"
+            caloriesTextView.text = "Калории: ${it.calories} ккал"
+            servingsTextView.text = "Порций: ${it.servings}"
+            
+            // TODO: Загрузка изображения рецепта
+            // recipeImageView.setImageURI(Uri.parse(it.imageUri))
+            
             ingredientsAdapter.submitList(it.ingredients)
             instructionsAdapter.submitList(it.instructions)
         }
@@ -85,35 +88,6 @@ class RecipeDetailsActivity : AppCompatActivity() {
             putExtra(EXTRA_RECIPE, recipe)
         }
         startActivity(intent)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_recipe_details, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete -> {
-                showDeleteConfirmationDialog()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun showDeleteConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Удаление рецепта")
-            .setMessage("Вы уверены, что хотите удалить этот рецепт?")
-            .setPositiveButton("Удалить") { _, _ ->
-                recipe?.let {
-                    RecipeRepository.deleteRecipe(it)
-                    finish()
-                }
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
     }
 
     companion object {

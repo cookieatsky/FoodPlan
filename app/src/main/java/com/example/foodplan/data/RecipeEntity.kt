@@ -15,7 +15,11 @@ data class RecipeEntity(
     val calories: Int,
     val servings: Int,
     val ingredients: List<String>,
-    val instructions: List<String>
+    val instructions: List<String>,
+    val isBreakfast: Boolean = false,
+    val isLunch: Boolean = false,
+    val isDinner: Boolean = false,
+    val isSnack: Boolean = false
 ) {
     fun toRecipe(): Recipe {
         return Recipe(
@@ -27,7 +31,11 @@ data class RecipeEntity(
             calories = calories,
             servings = servings,
             ingredients = ingredients,
-            instructions = instructions
+            instructions = instructions,
+            isBreakfast = isBreakfast,
+            isLunch = isLunch,
+            isDinner = isDinner,
+            isSnack = isSnack
         )
     }
 
@@ -42,7 +50,11 @@ data class RecipeEntity(
                 calories = recipe.calories,
                 servings = recipe.servings,
                 ingredients = recipe.ingredients,
-                instructions = recipe.instructions
+                instructions = recipe.instructions,
+                isBreakfast = recipe.isBreakfast,
+                isLunch = recipe.isLunch,
+                isDinner = recipe.isDinner,
+                isSnack = recipe.isSnack
             )
         }
     }
