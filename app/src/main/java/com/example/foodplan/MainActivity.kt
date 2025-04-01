@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.foodplan.ui.recipes.RecipesActivity
+import com.example.foodplan.ui.profile.ProfileActivity
 import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         profileButton.setOnClickListener {
-            // TODO: Переход к экрану профиля
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
     }
 }

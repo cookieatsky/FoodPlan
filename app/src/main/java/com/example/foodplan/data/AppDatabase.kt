@@ -5,11 +5,25 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.foodplan.data.converter.ActivityLevelConverter
+import com.example.foodplan.data.converter.GenderConverter
+import com.example.foodplan.data.converter.StringListConverter
 
-@Database(entities = [RecipeEntity::class], version = 2)
-@TypeConverters(Converters::class)
+@Database(
+    entities = [
+        RecipeEntity::class,
+        UserProfileEntity::class
+    ],
+    version = 1
+)
+@TypeConverters(
+    GenderConverter::class,
+    ActivityLevelConverter::class,
+    StringListConverter::class
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun recipeDao(): RecipeDao
+    abstract fun userProfileDao(): UserProfileDao
 
     companion object {
         @Volatile
