@@ -83,7 +83,7 @@ class MealPlanActivity : AppCompatActivity() {
             adapter = dateAdapter
         }
 
-        // Генерируем даты на неделю вперед
+        // Генерируем даты на неделю вперед.
         val dates = (0..6).map { LocalDate.now().plusDays(it.toLong()) }
         dateAdapter.submitList(dates)
     }
