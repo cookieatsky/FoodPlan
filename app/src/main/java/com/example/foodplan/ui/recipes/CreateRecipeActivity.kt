@@ -1,20 +1,42 @@
 package com.example.foodplan.ui.recipes
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplan.R
+import com.example.foodplan.databinding.ActivityCreateRecipeBinding
 import com.example.foodplan.model.Recipe
 import com.example.foodplan.repository.RecipeRepository
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.snackbar.Snackbar
+import com.example.foodplan.utils.PermissionUtils
 import kotlinx.coroutines.launch
+import androidx.activity.viewModels
+import android.util.Log
 
 class CreateRecipeActivity : AppCompatActivity() {
+    private val TAG = "CreateRecipeActivity"
+    private lateinit var binding: ActivityCreateRecipeBinding
+    private val viewModel: RecipeViewModel by viewModels()
+    private var selectedImageUri: Uri? = null
+    private var recipeId: Long = 0
+
     private lateinit var nameEditText: TextInputEditText
     private lateinit var descriptionEditText: TextInputEditText
     private lateinit var cookingTimeEditText: TextInputEditText
@@ -28,33 +50,55 @@ class CreateRecipeActivity : AppCompatActivity() {
     private lateinit var ingredientsAdapter: EditableTextAdapter
     private lateinit var instructionsAdapter: EditableTextAdapter
 
-    private var editingRecipe: Recipe? = null
-
     private lateinit var breakfastCheckBox: MaterialCheckBox
     private lateinit var lunchCheckBox: MaterialCheckBox
     private lateinit var dinnerCheckBox: MaterialCheckBox
     private lateinit var snackCheckBox: MaterialCheckBox
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            openImagePicker()
+        } else {
+            Toast.makeText(this, "Для добавления изображения необходимо разрешение", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            binding.recipeImageView.setImageURI(it)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_recipe)
+        binding = ActivityCreateRecipeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         recipeRepository = RecipeRepository.getInstance(this)
 
-        // Инициализация views
-        nameEditText = findViewById(R.id.nameEditText)
-        descriptionEditText = findViewById(R.id.descriptionEditText)
-        cookingTimeEditText = findViewById(R.id.cookingTimeEditText)
-        caloriesEditText = findViewById(R.id.caloriesEditText)
-        servingsEditText = findViewById(R.id.servingsEditText)
-        ingredientsRecyclerView = findViewById(R.id.ingredientsRecyclerView)
-        instructionsRecyclerView = findViewById(R.id.instructionsRecyclerView)
-        saveButton = findViewById(R.id.saveButton)
+        // Получаем ID рецепта из Intent
+        recipeId = intent.getLongExtra("recipe_id", 0)
+        Log.d(TAG, "Received recipe ID in CreateRecipeActivity: $recipeId")
 
-        breakfastCheckBox = findViewById(R.id.breakfastCheckBox)
-        lunchCheckBox = findViewById(R.id.lunchCheckBox)
-        dinnerCheckBox = findViewById(R.id.dinnerCheckBox)
-        snackCheckBox = findViewById(R.id.snackCheckBox)
+        // Инициализация views
+        nameEditText = binding.nameEditText
+        descriptionEditText = binding.descriptionEditText
+        cookingTimeEditText = binding.cookingTimeEditText
+        caloriesEditText = binding.caloriesEditText
+        servingsEditText = binding.servingsEditText
+        ingredientsRecyclerView = binding.ingredientsRecyclerView
+        instructionsRecyclerView = binding.instructionsRecyclerView
+        saveButton = binding.saveButton
+
+        breakfastCheckBox = binding.breakfastCheckBox
+        lunchCheckBox = binding.lunchCheckBox
+        dinnerCheckBox = binding.dinnerCheckBox
+        snackCheckBox = binding.snackCheckBox
 
         // Настройка RecyclerViews
         ingredientsAdapter = EditableTextAdapter { position ->
@@ -77,33 +121,72 @@ class CreateRecipeActivity : AppCompatActivity() {
             adapter = instructionsAdapter
         }
 
-        // Получаем рецепт для редактирования, если он есть
-        editingRecipe = intent.getParcelableExtra(RecipeDetailsActivity.EXTRA_RECIPE)
-        if (editingRecipe != null) {
-            fillRecipeData(editingRecipe!!)
+        setupClickListeners()
+        setupObservers()
+
+        // Если это редактирование, загружаем данные рецепта
+        if (recipeId != 0L) {
+            Log.d(TAG, "Loading recipe for editing with ID: $recipeId")
+            loadRecipe()
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.addImageButton.setOnClickListener {
+            checkAndRequestPermission()
         }
 
-        // Настройка кнопок
-        findViewById<MaterialButton>(R.id.addIngredientButton).setOnClickListener {
-            val currentList = ingredientsAdapter.getItems().toMutableList()
+        binding.addIngredientButton.setOnClickListener {
+            val adapter = binding.ingredientsRecyclerView.adapter as EditableTextAdapter
+            val currentList = adapter.getItems().toMutableList()
             currentList.add("")
-            ingredientsAdapter.submitList(currentList)
+            adapter.submitList(currentList)
         }
 
-        findViewById<MaterialButton>(R.id.addInstructionButton).setOnClickListener {
-            val currentList = instructionsAdapter.getItems().toMutableList()
+        binding.addInstructionButton.setOnClickListener {
+            val adapter = binding.instructionsRecyclerView.adapter as EditableTextAdapter
+            val currentList = adapter.getItems().toMutableList()
             currentList.add("")
-            instructionsAdapter.submitList(currentList)
+            adapter.submitList(currentList)
         }
 
-        saveButton.setOnClickListener {
-            if (validateInputs()) {
-                saveRecipe()
+        binding.saveButton.setOnClickListener {
+            saveRecipe()
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.recipeCreated.observe(this) { success ->
+            if (success) {
+                Toast.makeText(this, "Рецепт успешно создан", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+
+        viewModel.error.observe(this) { error ->
+            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    private fun loadRecipe() {
+        lifecycleScope.launch {
+            Log.d(TAG, "Starting to load recipe with ID: $recipeId")
+            val recipe = viewModel.getRecipeById(recipeId)
+            if (recipe != null) {
+                Log.d(TAG, "Successfully loaded recipe: ${recipe.name}")
+                displayRecipe(recipe)
+            } else {
+                Log.e(TAG, "Failed to load recipe with ID: $recipeId")
+                Toast.makeText(this@CreateRecipeActivity, 
+                    "Не удалось загрузить рецепт", 
+                    Toast.LENGTH_LONG).show()
+                finish()
             }
         }
     }
 
-    private fun fillRecipeData(recipe: Recipe) {
+    private fun displayRecipe(recipe: Recipe) {
+        Log.d(TAG, "Displaying recipe: ${recipe.name}")
         nameEditText.setText(recipe.name)
         descriptionEditText.setText(recipe.description)
         cookingTimeEditText.setText(recipe.cookingTime.toString())
@@ -116,6 +199,11 @@ class CreateRecipeActivity : AppCompatActivity() {
         lunchCheckBox.isChecked = recipe.isLunch
         dinnerCheckBox.isChecked = recipe.isDinner
         snackCheckBox.isChecked = recipe.isSnack
+
+        recipe.imageUri?.let { uri ->
+            selectedImageUri = Uri.parse(uri)
+            binding.recipeImageView.setImageURI(selectedImageUri)
+        }
     }
 
     private fun validateInputs(): Boolean {
@@ -160,32 +248,57 @@ class CreateRecipeActivity : AppCompatActivity() {
         return true
     }
 
-    private fun saveRecipe() {
-        val recipe = Recipe(
-            id = editingRecipe?.id ?: 0,
-            name = nameEditText.text.toString(),
-            description = descriptionEditText.text.toString(),
-            cookingTime = cookingTimeEditText.text.toString().toInt(),
-            calories = caloriesEditText.text.toString().toInt(),
-            servings = servingsEditText.text.toString().toInt(),
-            imageUri = null,
-            ingredients = ingredientsAdapter.getItems().filter { it.isNotBlank() },
-            instructions = instructionsAdapter.getItems().filter { it.isNotBlank() },
-            isBreakfast = breakfastCheckBox.isChecked,
-            isLunch = lunchCheckBox.isChecked,
-            isDinner = dinnerCheckBox.isChecked,
-            isSnack = snackCheckBox.isChecked
-        )
-
-        lifecycleScope.launch {
-            if (editingRecipe != null) {
-                recipeRepository.updateRecipe(recipe)
-                Toast.makeText(this@CreateRecipeActivity, "Рецепт обновлен", Toast.LENGTH_SHORT).show()
+    private fun checkAndRequestPermission() {
+        if (PermissionUtils.hasStoragePermission(this)) {
+            openImagePicker()
+        } else {
+            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_IMAGES
             } else {
-                recipeRepository.insertRecipe(recipe)
-                Toast.makeText(this@CreateRecipeActivity, "Рецепт сохранен", Toast.LENGTH_SHORT).show()
+                Manifest.permission.READ_EXTERNAL_STORAGE
             }
-            finish()
+            requestPermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun openImagePicker() {
+        imagePickerLauncher.launch("image/*")
+    }
+
+    private fun saveRecipe() {
+        if (validateInputs()) {
+            val name = nameEditText.text.toString()
+            val description = descriptionEditText.text.toString()
+            val cookingTime = cookingTimeEditText.text.toString().toIntOrNull() ?: 0
+            val calories = caloriesEditText.text.toString().toIntOrNull() ?: 0
+            val servings = servingsEditText.text.toString().toIntOrNull() ?: 0
+            val ingredients = ingredientsAdapter.getItems().filter { it.isNotBlank() }
+            val instructions = instructionsAdapter.getItems().filter { it.isNotBlank() }
+
+            val recipe = Recipe(
+                id = recipeId,
+                name = name,
+                description = description,
+                cookingTime = cookingTime,
+                calories = calories,
+                servings = servings,
+                imageUri = selectedImageUri?.toString(),
+                ingredients = ingredients,
+                instructions = instructions,
+                isBreakfast = breakfastCheckBox.isChecked,
+                isLunch = lunchCheckBox.isChecked,
+                isDinner = dinnerCheckBox.isChecked,
+                isSnack = snackCheckBox.isChecked
+            )
+
+            lifecycleScope.launch {
+                if (recipeId == 0L) {
+                    viewModel.createRecipe(recipe)
+                } else {
+                    viewModel.updateRecipe(recipe)
+                }
+                finish()
+            }
         }
     }
 } 

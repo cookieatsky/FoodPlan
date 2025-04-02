@@ -9,27 +9,27 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplan.R
 
-class TextListAdapter : ListAdapter<String, TextListAdapter.TextViewHolder>(TextDiffCallback()) {
+class InstructionAdapter : ListAdapter<String, InstructionAdapter.InstructionViewHolder>(InstructionDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InstructionViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_instruction, parent, false)
-        return TextViewHolder(view)
+        return InstructionViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: TextViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: InstructionViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class TextViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class InstructionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val textView: TextView = itemView as TextView
 
-        fun bind(text: String) {
-            textView.text = text
+        fun bind(instruction: String) {
+            textView.text = instruction
         }
     }
 
-    private class TextDiffCallback : DiffUtil.ItemCallback<String>() {
+    private class InstructionDiffCallback : DiffUtil.ItemCallback<String>() {
         override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
             return oldItem == newItem
         }

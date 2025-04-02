@@ -1,17 +1,24 @@
 package com.example.foodplan.ui.recipes
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodplan.R
 import com.example.foodplan.model.Recipe
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import kotlinx.coroutines.launch
 
 class RecipeDetailsActivity : AppCompatActivity() {
+    private val TAG = "RecipeDetailsActivity"
     private lateinit var recipeImageView: ImageView
     private lateinit var recipeNameTextView: TextView
     private lateinit var recipeDescriptionTextView: TextView
@@ -25,14 +32,16 @@ class RecipeDetailsActivity : AppCompatActivity() {
     private lateinit var ingredientsAdapter: TextListAdapter
     private lateinit var instructionsAdapter: TextListAdapter
 
-    private var recipe: Recipe? = null
+    private val viewModel: RecipeViewModel by viewModels()
+    private var recipeId: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recipe_details)
 
-        // Получаем рецепт из Intent
-        recipe = intent.getParcelableExtra(EXTRA_RECIPE)
+        // Получаем ID рецепта из Intent
+        recipeId = intent.getLongExtra("recipe_id", 0)
+        Log.d(TAG, "Received recipe ID: $recipeId")
 
         // Инициализация views
         recipeImageView = findViewById(R.id.recipeImageView)
@@ -60,37 +69,47 @@ class RecipeDetailsActivity : AppCompatActivity() {
 
         // Настройка кнопки редактирования
         editButton.setOnClickListener {
-            recipe?.let { startEditRecipe(it) }
+            Log.d(TAG, "Edit button clicked for recipe ID: $recipeId")
+            startEditRecipe()
         }
 
-        // Отображение данных рецепта
-        displayRecipe()
+        // Загрузка данных рецепта
+        loadRecipe()
     }
 
-    private fun displayRecipe() {
-        recipe?.let {
-            recipeNameTextView.text = it.name
-            recipeDescriptionTextView.text = it.description
-            cookingTimeTextView.text = "Время приготовления: ${it.cookingTime} мин"
-            caloriesTextView.text = "Калории: ${it.calories} ккал"
-            servingsTextView.text = "Порций: ${it.servings}"
-            
-            // TODO: Загрузка изображения рецепта
-            // recipeImageView.setImageURI(Uri.parse(it.imageUri))
-            
-            ingredientsAdapter.submitList(it.ingredients)
-            instructionsAdapter.submitList(it.instructions)
+    private fun loadRecipe() {
+        lifecycleScope.launch {
+            Log.d(TAG, "Loading recipe with ID: $recipeId")
+            val recipe = viewModel.getRecipeById(recipeId)
+            if (recipe != null) {
+                Log.d(TAG, "Recipe loaded successfully: ${recipe.name}")
+                displayRecipe(recipe)
+            } else {
+                Log.e(TAG, "Failed to load recipe with ID: $recipeId")
+            }
         }
     }
 
-    private fun startEditRecipe(recipe: Recipe) {
+    private fun displayRecipe(recipe: Recipe) {
+        recipeNameTextView.text = recipe.name
+        recipeDescriptionTextView.text = recipe.description
+        cookingTimeTextView.text = "Время приготовления: ${recipe.cookingTime} мин"
+        caloriesTextView.text = "Калории: ${recipe.calories} ккал"
+        servingsTextView.text = "Порций: ${recipe.servings}"
+        
+        recipe.imageUri?.let { uri ->
+            recipeImageView.setImageURI(Uri.parse(uri))
+        }
+        
+        ingredientsAdapter.submitList(recipe.ingredients)
+        instructionsAdapter.submitList(recipe.instructions)
+    }
+
+    private fun startEditRecipe() {
+        Log.d(TAG, "Starting edit activity for recipe ID: $recipeId")
         val intent = Intent(this, CreateRecipeActivity::class.java).apply {
-            putExtra(EXTRA_RECIPE, recipe)
+            putExtra("recipe_id", recipeId)
         }
         startActivity(intent)
-    }
-
-    companion object {
-        const val EXTRA_RECIPE = "extra_recipe"
     }
 } 

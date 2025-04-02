@@ -1,6 +1,8 @@
 package com.example.foodplan
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -8,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +28,16 @@ class CreateRecipeActivity : AppCompatActivity() {
 
     private lateinit var ingredientsAdapter: EditableTextAdapter
     private lateinit var instructionsAdapter: EditableTextAdapter
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            openImagePicker()
+        } else {
+            Toast.makeText(this, "Для добавления изображения необходим доступ к галерее", Toast.LENGTH_LONG).show()
+        }
+    }
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -73,9 +86,8 @@ class CreateRecipeActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        binding.selectImageButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            pickImage.launch(intent)
+        binding.addImageButton.setOnClickListener {
+            checkPermissionAndPickImage()
         }
 
         binding.addIngredientButton.setOnClickListener {
@@ -93,6 +105,25 @@ class CreateRecipeActivity : AppCompatActivity() {
         binding.saveButton.setOnClickListener {
             saveRecipe()
         }
+    }
+
+    private fun checkPermissionAndPickImage() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                openImagePicker()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun openImagePicker() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        pickImage.launch(intent)
     }
 
     private fun saveRecipe() {

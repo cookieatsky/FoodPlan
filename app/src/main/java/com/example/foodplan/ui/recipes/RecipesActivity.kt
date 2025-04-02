@@ -2,64 +2,67 @@ package com.example.foodplan.ui.recipes
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.foodplan.R
+import com.example.foodplan.databinding.ActivityRecipesBinding
 import com.example.foodplan.model.Recipe
-import com.example.foodplan.repository.RecipeRepository
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 class RecipesActivity : AppCompatActivity() {
-    private lateinit var recipesRecyclerView: RecyclerView
-    private lateinit var addRecipeFab: FloatingActionButton
+    private lateinit var binding: ActivityRecipesBinding
+    private val viewModel: RecipeViewModel by viewModels()
     private lateinit var recipeAdapter: RecipeAdapter
-    private lateinit var recipeRepository: RecipeRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recipes)
+        binding = ActivityRecipesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recipeRepository = RecipeRepository.getInstance(this)
-
-        // Инициализация views
-        recipesRecyclerView = findViewById(R.id.recipesRecyclerView)
-        addRecipeFab = findViewById(R.id.addRecipeFab)
-
-        // Настройка RecyclerView
-        recipeAdapter = RecipeAdapter { recipe ->
-            val intent = Intent(this, RecipeDetailsActivity::class.java).apply {
-                putExtra(RecipeDetailsActivity.EXTRA_RECIPE, recipe)
-            }
-            startActivity(intent)
-        }
-        recipesRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@RecipesActivity)
-            adapter = recipeAdapter
-        }
-
-        // Настройка FAB
-        addRecipeFab.setOnClickListener {
-            startActivity(Intent(this, CreateRecipeActivity::class.java))
-        }
-
-        // Загрузка рецептов
+        setupRecyclerView()
+        setupObservers()
+        setupClickListeners()
         loadRecipes()
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Обновляем список при возвращении на экран
-        loadRecipes()
+    private fun setupRecyclerView() {
+        recipeAdapter = RecipeAdapter(
+            onRecipeClick = { recipe ->
+                val intent = Intent(this, RecipeDetailsActivity::class.java)
+                intent.putExtra("recipe_id", recipe.id)
+                startActivity(intent)
+            },
+            onRecipeDelete = { recipe ->
+                viewModel.deleteRecipe(recipe)
+            }
+        )
+        binding.recipesRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@RecipesActivity)
+            adapter = recipeAdapter
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.recipes.observe(this) { recipes ->
+            recipeAdapter.submitList(recipes)
+        }
+
+        viewModel.error.observe(this) { error ->
+            // Показать ошибку пользователю
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.addRecipeFab.setOnClickListener {
+            startActivity(Intent(this, CreateRecipeActivity::class.java))
+        }
     }
 
     private fun loadRecipes() {
         lifecycleScope.launch {
-            recipeRepository.getAllRecipes().collect { recipes ->
-                recipeAdapter.submitList(recipes)
-            }
+            viewModel.loadRecipes()
         }
     }
 } 

@@ -3,6 +3,7 @@ package com.example.foodplan.ui.recipes
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
@@ -12,7 +13,8 @@ import com.example.foodplan.R
 import com.example.foodplan.model.Recipe
 
 class RecipeAdapter(
-    private val onRecipeClick: (Recipe) -> Unit
+    private val onRecipeClick: (Recipe) -> Unit,
+    private val onRecipeDelete: (Recipe) -> Unit
 ) : ListAdapter<Recipe, RecipeAdapter.RecipeViewHolder>(RecipeDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -31,12 +33,20 @@ class RecipeAdapter(
         private val descriptionTextView: TextView = itemView.findViewById(R.id.recipeDescriptionTextView)
         private val cookingTimeTextView: TextView = itemView.findViewById(R.id.cookingTimeTextView)
         private val servingsTextView: TextView = itemView.findViewById(R.id.servingsTextView)
+        private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
 
         init {
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onRecipeClick(getItem(position))
+                }
+            }
+
+            deleteButton.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onRecipeDelete(getItem(position))
                 }
             }
         }
