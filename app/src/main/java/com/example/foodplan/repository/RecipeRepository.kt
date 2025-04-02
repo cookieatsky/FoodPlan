@@ -17,10 +17,8 @@ class RecipeRepository private constructor(private val context: Context) {
         }
     }
 
-    fun getRecipeById(id: Long): Flow<Recipe?> {
-        return recipeDao.getRecipeById(id).map { entity ->
-            entity?.toRecipe()
-        }
+    suspend fun getRecipeById(id: Long): Recipe? {
+        return recipeDao.getRecipeById(id)?.toRecipe()
     }
 
     suspend fun insertRecipe(recipe: Recipe) {

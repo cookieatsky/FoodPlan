@@ -43,20 +43,24 @@
                     android:id="@+id/caloriesTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/servingsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:textSize="14sp" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/deleteButton"
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_delete" />
+            android:src="@android:drawable/ic_menu_add" />
 
     </LinearLayout>
 

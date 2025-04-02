@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserProfileDao {
-    @Query("SELECT * FROM user_profile LIMIT 1")
+    @Query("SELECT * FROM user_profiles LIMIT 1")
     fun getUserProfile(): Flow<UserProfileEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

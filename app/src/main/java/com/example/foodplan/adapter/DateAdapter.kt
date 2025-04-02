@@ -1,51 +1,53 @@
 package com.example.foodplan.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.foodplan.R
+import com.example.foodplan.databinding.ItemDateBinding
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-class DateAdapter(
-    private val onDateSelected: (LocalDate) -> Unit
-) : ListAdapter<LocalDate, DateAdapter.DateViewHolder>(DateDiffCallback()) {
-
-    private var selectedPosition = 0
+class DateAdapter(private val onDateSelected: (LocalDate) -> Unit) :
+    ListAdapter<LocalDate, DateAdapter.DateViewHolder>(DateDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_date, parent, false)
-        return DateViewHolder(view)
+        val binding = ItemDateBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return DateViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: DateViewHolder, position: Int) {
-        holder.bind(getItem(position), position == selectedPosition)
+        holder.bind(getItem(position))
     }
 
-    inner class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val dayOfWeekTextView: TextView = itemView.findViewById(R.id.dayOfWeekTextView)
-        private val dateTextView: TextView = itemView.findViewById(R.id.dateTextView)
+    inner class DateViewHolder(private val binding: ItemDateBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(date: LocalDate, isSelected: Boolean) {
-            val dayOfWeekFormatter = DateTimeFormatter.ofPattern("EEE", Locale("ru"))
-            val dateFormatter = DateTimeFormatter.ofPattern("d MMM", Locale("ru"))
+        init {
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onDateSelected(getItem(position))
+                }
+            }
+        }
 
-            dayOfWeekTextView.text = date.format(dayOfWeekFormatter)
-            dateTextView.text = date.format(dateFormatter)
-
-            itemView.isSelected = isSelected
-            itemView.setOnClickListener {
-                val previousPosition = selectedPosition
-                selectedPosition = bindingAdapterPosition
-                notifyItemChanged(previousPosition)
-                notifyItemChanged(selectedPosition)
-                onDateSelected(date)
+        fun bind(date: LocalDate) {
+            val formatter = DateTimeFormatter.ofPattern("dd.MM")
+            binding.dateTextView.text = date.format(formatter)
+            binding.dayOfWeekTextView.text = when (date.dayOfWeek) {
+                java.time.DayOfWeek.MONDAY -> "Пн"
+                java.time.DayOfWeek.TUESDAY -> "Вт"
+                java.time.DayOfWeek.WEDNESDAY -> "Ср"
+                java.time.DayOfWeek.THURSDAY -> "Чт"
+                java.time.DayOfWeek.FRIDAY -> "Пт"
+                java.time.DayOfWeek.SATURDAY -> "Сб"
+                java.time.DayOfWeek.SUNDAY -> "Вс"
             }
         }
     }

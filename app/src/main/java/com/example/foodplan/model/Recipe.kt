@@ -5,15 +5,15 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Recipe(
-    val id: Long,
+    val id: Long = 0,
     val name: String,
     val description: String,
-    val cookingTime: Int, // в минутах
-    val calories: Int,
-    val servings: Int,
-    val imageUri: String?,
     val ingredients: List<String>,
     val instructions: List<String>,
+    val cookingTime: Int = 0, // в минутах
+    val calories: Int = 0,
+    val servings: Int = 1,
+    val imageUri: String? = null,
     val isBreakfast: Boolean = false,
     val isLunch: Boolean = false,
     val isDinner: Boolean = false,
@@ -28,12 +28,12 @@ data class Recipe(
         if (id != other.id) return false
         if (name != other.name) return false
         if (description != other.description) return false
-        if (imageUri != other.imageUri) return false
+        if (ingredients != other.ingredients) return false
+        if (instructions != other.instructions) return false
         if (cookingTime != other.cookingTime) return false
         if (calories != other.calories) return false
         if (servings != other.servings) return false
-        if (ingredients != other.ingredients) return false
-        if (instructions != other.instructions) return false
+        if (imageUri != other.imageUri) return false
         if (isBreakfast != other.isBreakfast) return false
         if (isLunch != other.isLunch) return false
         if (isDinner != other.isDinner) return false
@@ -46,12 +46,12 @@ data class Recipe(
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + description.hashCode()
-        result = 31 * result + (imageUri?.hashCode() ?: 0)
+        result = 31 * result + ingredients.hashCode()
+        result = 31 * result + instructions.hashCode()
         result = 31 * result + cookingTime
         result = 31 * result + calories
         result = 31 * result + servings
-        result = 31 * result + ingredients.hashCode()
-        result = 31 * result + instructions.hashCode()
+        result = 31 * result + (imageUri?.hashCode() ?: 0)
         result = 31 * result + isBreakfast.hashCode()
         result = 31 * result + isLunch.hashCode()
         result = 31 * result + isDinner.hashCode()

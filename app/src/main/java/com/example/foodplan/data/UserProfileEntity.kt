@@ -6,7 +6,7 @@ import com.example.foodplan.model.ActivityLevel
 import com.example.foodplan.model.Gender
 import com.example.foodplan.model.UserProfile
 
-@Entity(tableName = "user_profile")
+@Entity(tableName = "user_profiles")
 data class UserProfileEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

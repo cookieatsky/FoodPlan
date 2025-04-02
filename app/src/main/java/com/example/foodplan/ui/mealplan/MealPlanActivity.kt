@@ -1,50 +1,31 @@
-package com.example.foodplan
+package com.example.foodplan.ui.mealplan
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ListAdapter
+import com.example.foodplan.R
 import com.example.foodplan.adapter.DateAdapter
 import com.example.foodplan.adapter.MealRecipeAdapter
 import com.example.foodplan.adapter.SelectRecipeAdapter
 import com.example.foodplan.databinding.ActivityMealPlanBinding
 import com.example.foodplan.model.MealPlan
-import com.example.foodplan.model.MealType
 import com.example.foodplan.model.Recipe
 import com.example.foodplan.model.ShoppingListItem
 import com.example.foodplan.repository.MealPlanRepository
 import com.example.foodplan.repository.RecipeRepository
 import com.example.foodplan.repository.ShoppingListRepository
-import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class MealPlanActivity : AppCompatActivity() {
 
-    private lateinit var dateRecyclerView: RecyclerView
-    private lateinit var selectedDateTextView: TextView
-    private lateinit var breakfastRecyclerView: RecyclerView
-    private lateinit var lunchRecyclerView: RecyclerView
-    private lateinit var dinnerRecyclerView: RecyclerView
-    private lateinit var snackRecyclerView: RecyclerView
-
-    private lateinit var addBreakfastButton: MaterialButton
-    private lateinit var addLunchButton: MaterialButton
-    private lateinit var addDinnerButton: MaterialButton
-    private lateinit var addSnackButton: MaterialButton
-
+    private lateinit var binding: ActivityMealPlanBinding
     private lateinit var dateAdapter: DateAdapter
     private lateinit var breakfastAdapter: MealRecipeAdapter
     private lateinit var lunchAdapter: MealRecipeAdapter
@@ -59,8 +40,6 @@ class MealPlanActivity : AppCompatActivity() {
     private lateinit var mealPlanRepository: MealPlanRepository
     private lateinit var recipeRepository: RecipeRepository
 
-    private lateinit var binding: ActivityMealPlanBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMealPlanBinding.inflate(layoutInflater)
@@ -70,7 +49,7 @@ class MealPlanActivity : AppCompatActivity() {
         mealPlanRepository = MealPlanRepository.getInstance(this)
 
         setupDateRecyclerView()
-        setupMealRecyclerView()
+        setupMealRecyclerViews()
         setupButtons()
         loadMealPlan()
     }
@@ -81,18 +60,17 @@ class MealPlanActivity : AppCompatActivity() {
             loadMealPlan()
         }
 
-        dateRecyclerView = binding.dateRecyclerView
-        dateRecyclerView.apply {
+        binding.dateRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MealPlanActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = dateAdapter
         }
 
-        // Генерируем даты на неделю вперед..
+        // Генерируем даты на неделю вперед
         val dates = (0..6).map { LocalDate.now().plusDays(it.toLong()) }
         dateAdapter.submitList(dates)
     }
 
-    private fun setupMealRecyclerView() {
+    private fun setupMealRecyclerViews() {
         breakfastAdapter = MealRecipeAdapter { recipe ->
             mealPlan.breakfastRecipes.remove(recipe)
             saveMealPlan()
@@ -117,55 +95,44 @@ class MealPlanActivity : AppCompatActivity() {
             addRecipeToMeal(recipe)
         }
 
-        breakfastRecyclerView = binding.breakfastRecyclerView
-        breakfastRecyclerView.apply {
+        binding.breakfastRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MealPlanActivity)
             adapter = breakfastAdapter
         }
 
-        lunchRecyclerView = binding.lunchRecyclerView
-        lunchRecyclerView.apply {
+        binding.lunchRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MealPlanActivity)
             adapter = lunchAdapter
         }
 
-        dinnerRecyclerView = binding.dinnerRecyclerView
-        dinnerRecyclerView.apply {
+        binding.dinnerRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MealPlanActivity)
             adapter = dinnerAdapter
         }
 
-        snackRecyclerView = binding.snackRecyclerView
-        snackRecyclerView.apply {
+        binding.snackRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MealPlanActivity)
             adapter = snackAdapter
         }
-
-        setupButtons()
     }
 
     private fun setupButtons() {
-        addBreakfastButton = binding.addBreakfastButton
-        addLunchButton = binding.addLunchButton
-        addDinnerButton = binding.addDinnerButton
-        addSnackButton = binding.addSnackButton
-
-        addBreakfastButton.setOnClickListener {
+        binding.addBreakfastButton.setOnClickListener {
             currentMealType = MealType.BREAKFAST
             showSelectRecipeDialog(MealType.BREAKFAST)
         }
 
-        addLunchButton.setOnClickListener {
+        binding.addLunchButton.setOnClickListener {
             currentMealType = MealType.LUNCH
             showSelectRecipeDialog(MealType.LUNCH)
         }
 
-        addDinnerButton.setOnClickListener {
+        binding.addDinnerButton.setOnClickListener {
             currentMealType = MealType.DINNER
             showSelectRecipeDialog(MealType.DINNER)
         }
 
-        addSnackButton.setOnClickListener {
+        binding.addSnackButton.setOnClickListener {
             currentMealType = MealType.SNACK
             showSelectRecipeDialog(MealType.SNACK)
         }
@@ -244,13 +211,19 @@ class MealPlanActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
-        selectedDateTextView = binding.selectedDateTextView
-        selectedDateTextView.text = currentDate.format(dateFormatter)
-
         breakfastAdapter.submitList(mealPlan.breakfastRecipes.toList())
         lunchAdapter.submitList(mealPlan.lunchRecipes.toList())
         dinnerAdapter.submitList(mealPlan.dinnerRecipes.toList())
         snackAdapter.submitList(mealPlan.snackRecipes.toList())
+        
+        // Обновляем текст выбранной даты
+        binding.selectedDateTextView.text = currentDate.toString()
     }
+}
+
+enum class MealType {
+    BREAKFAST,
+    LUNCH,
+    DINNER,
+    SNACK
 } 

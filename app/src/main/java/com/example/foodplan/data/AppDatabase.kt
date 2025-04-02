@@ -12,9 +12,10 @@ import com.example.foodplan.data.converter.StringListConverter
 @Database(
     entities = [
         RecipeEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        ShoppingListItemEntity::class
     ],
-    version = 1
+    version = 2
 )
 @TypeConverters(
     GenderConverter::class,
@@ -24,6 +25,7 @@ import com.example.foodplan.data.converter.StringListConverter
 abstract class AppDatabase : RoomDatabase() {
     abstract fun recipeDao(): RecipeDao
     abstract fun userProfileDao(): UserProfileDao
+    abstract fun shoppingListDao(): ShoppingListItemDao
 
     companion object {
         @Volatile
@@ -42,18 +44,5 @@ abstract class AppDatabase : RoomDatabase() {
                 instance
             }
         }
-    }
-}
-
-@androidx.room.TypeConverters
-class Converters {
-    @androidx.room.TypeConverter
-    fun fromString(value: String): List<String> {
-        return value.split(",")
-    }
-
-    @androidx.room.TypeConverter
-    fun toString(list: List<String>): String {
-        return list.joinToString(",")
     }
 } 

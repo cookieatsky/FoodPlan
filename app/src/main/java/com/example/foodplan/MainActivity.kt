@@ -2,22 +2,28 @@ package com.example.foodplan
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.example.foodplan.ui.recipes.RecipesActivity
+import com.example.foodplan.databinding.ActivityMainBinding
+import com.example.foodplan.ui.mealplan.MealPlanActivity
 import com.example.foodplan.ui.profile.ProfileActivity
+import com.example.foodplan.ui.recipes.RecipesActivity
+import com.example.foodplan.ui.shoppinglist.ShoppingListActivity
 import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Инициализация кнопок
-        val recipesButton = findViewById<MaterialButton>(R.id.recipesButton)
-        val mealPlanButton = findViewById<MaterialButton>(R.id.mealPlanButton)
-        val shoppingListButton = findViewById<MaterialButton>(R.id.shoppingListButton)
-        val profileButton = findViewById<MaterialButton>(R.id.profileButton)
+        val recipesButton = binding.recipesButton
+        val mealPlanButton = binding.mealPlanButton
+        val shoppingListButton = binding.shoppingListButton
+        val profileButton = binding.profileButton
 
         // Обработчики нажатий
         recipesButton.setOnClickListener {
@@ -29,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         shoppingListButton.setOnClickListener {
-            // TODO: Переход к экрану списка покупок
+            startActivity(Intent(this, ShoppingListActivity::class.java))
         }
 
         profileButton.setOnClickListener {

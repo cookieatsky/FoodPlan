@@ -18,6 +18,8 @@
         android:id="@+id/recipesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="400dp"/>
+        android:maxHeight="400dp"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
 
 </LinearLayout> 

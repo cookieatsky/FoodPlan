@@ -1,50 +1,49 @@
 package com.example.foodplan.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.foodplan.R
+import com.example.foodplan.databinding.ItemMealRecipeBinding
 import com.example.foodplan.model.Recipe
 
-class MealRecipeAdapter(
-    private val onDeleteClick: (Recipe) -> Unit
-) : ListAdapter<Recipe, MealRecipeAdapter.MealRecipeViewHolder>(RecipeDiffCallback()) {
+class MealRecipeAdapter(private val onRecipeClick: (Recipe) -> Unit) :
+    ListAdapter<Recipe, MealRecipeAdapter.MealRecipeViewHolder>(MealRecipeDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealRecipeViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_meal_recipe, parent, false)
-        return MealRecipeViewHolder(view)
+        val binding = ItemMealRecipeBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return MealRecipeViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MealRecipeViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class MealRecipeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val recipeImageView: ImageView = itemView.findViewById(R.id.recipeImageView)
-        private val recipeNameTextView: TextView = itemView.findViewById(R.id.recipeNameTextView)
-        private val recipeDescriptionTextView: TextView = itemView.findViewById(R.id.recipeDescriptionTextView)
-        private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
+    inner class MealRecipeViewHolder(private val binding: ItemMealRecipeBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onRecipeClick(getItem(position))
+                }
+            }
+        }
 
         fun bind(recipe: Recipe) {
-            recipeNameTextView.text = recipe.name
-            recipeDescriptionTextView.text = recipe.description
-
-            // TODO: Загрузка изображения рецепта
-
-            deleteButton.setOnClickListener {
-                onDeleteClick(recipe)
-            }
+            binding.recipeNameTextView.text = recipe.name
+            binding.cookingTimeTextView.text = "${recipe.cookingTime} мин"
+            binding.caloriesTextView.text = "${recipe.calories} ккал"
         }
     }
 
-    private class RecipeDiffCallback : DiffUtil.ItemCallback<Recipe>() {
+    private class MealRecipeDiffCallback : DiffUtil.ItemCallback<Recipe>() {
         override fun areItemsTheSame(oldItem: Recipe, newItem: Recipe): Boolean {
             return oldItem.id == newItem.id
         }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "82e7482e122e667d85d09e994ba6d954",
+    "identityHash": "b3e0175de144839929aed62e64b3cdc3",
     "entities": [
       {
         "tableName": "recipes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `imageUri` TEXT, `cookingTime` INTEGER NOT NULL, `calories` INTEGER NOT NULL, `servings` INTEGER NOT NULL, `ingredients` TEXT NOT NULL, `instructions` TEXT NOT NULL, `isBreakfast` INTEGER NOT NULL, `isLunch` INTEGER NOT NULL, `isDinner` INTEGER NOT NULL, `isSnack` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `instructions` TEXT NOT NULL, `cookingTime` INTEGER NOT NULL, `calories` INTEGER NOT NULL, `servings` INTEGER NOT NULL, `imageUri` TEXT, `isBreakfast` INTEGER NOT NULL, `isLunch` INTEGER NOT NULL, `isDinner` INTEGER NOT NULL, `isSnack` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -27,10 +27,16 @@
             "notNull": true
           },
           {
-            "fieldPath": "imageUri",
-            "columnName": "imageUri",
+            "fieldPath": "ingredients",
+            "columnName": "ingredients",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
+          },
+          {
+            "fieldPath": "instructions",
+            "columnName": "instructions",
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "cookingTime",
@@ -51,16 +57,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "ingredients",
-            "columnName": "ingredients",
+            "fieldPath": "imageUri",
+            "columnName": "imageUri",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "instructions",
-            "columnName": "instructions",
-            "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "isBreakfast",
@@ -95,12 +95,118 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "user_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `age` INTEGER NOT NULL, `weight` REAL NOT NULL, `height` INTEGER NOT NULL, `gender` TEXT NOT NULL, `activityLevel` TEXT NOT NULL, `dailyCaloriesGoal` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "age",
+            "columnName": "age",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityLevel",
+            "columnName": "activityLevel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dailyCaloriesGoal",
+            "columnName": "dailyCaloriesGoal",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "shopping_list_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `isChecked` INTEGER NOT NULL, `date` INTEGER NOT NULL, `recipeId` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isChecked",
+            "columnName": "isChecked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recipeId",
+            "columnName": "recipeId",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '82e7482e122e667d85d09e994ba6d954')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b3e0175de144839929aed62e64b3cdc3')"
     ]
   }
 }
