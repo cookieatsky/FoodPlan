@@ -36,6 +36,11 @@
             android:label="Рецепт"
             android:parentActivityName=".ui.recipes.RecipesActivity"/>
         <activity
+            android:name=".ui.recipes.ImportRecipesActivity"
+            android:exported="false"
+            android:label="Загрузить рецепты"
+            android:parentActivityName=".MainActivity"/>
+        <activity
             android:name=".MealPlanActivity"
             android:exported="false" />
         <activity

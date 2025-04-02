@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.foodplan.databinding.ActivityMainBinding
 import com.example.foodplan.ui.mealplan.MealPlanActivity
 import com.example.foodplan.ui.profile.ProfileActivity
+import com.example.foodplan.ui.recipes.ImportRecipesActivity
 import com.example.foodplan.ui.recipes.RecipesActivity
 import com.example.foodplan.ui.shoppinglist.ShoppingListActivity
 import com.google.android.material.button.MaterialButton
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         // Инициализация кнопок
         val recipesButton = binding.recipesButton
+        val importRecipesButton = binding.importRecipesButton
         val mealPlanButton = binding.mealPlanButton
         val shoppingListButton = binding.shoppingListButton
         val profileButton = binding.profileButton
@@ -28,6 +30,10 @@ class MainActivity : AppCompatActivity() {
         // Обработчики нажатий
         recipesButton.setOnClickListener {
             startActivity(Intent(this, RecipesActivity::class.java))
+        }
+
+        importRecipesButton.setOnClickListener {
+            startActivity(Intent(this, ImportRecipesActivity::class.java))
         }
 
         mealPlanButton.setOnClickListener {

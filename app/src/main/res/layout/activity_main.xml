@@ -15,6 +15,13 @@
         android:text="Рецепты" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/importRecipesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Загрузить рецепты" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/mealPlanButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
