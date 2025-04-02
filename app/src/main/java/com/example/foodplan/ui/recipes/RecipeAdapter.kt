@@ -1,5 +1,6 @@
 package com.example.foodplan.ui.recipes
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.foodplan.R
 import com.example.foodplan.model.Recipe
 
@@ -57,9 +59,20 @@ class RecipeAdapter(
             cookingTimeTextView.text = "Время приготовления: ${recipe.cookingTime} мин"
             servingsTextView.text = "Порций: ${recipe.servings}"
 
-            // TODO: Загрузка изображения рецепта
-            recipe.imageUri?.let { _ ->
-                // Здесь будет код для загрузки изображения
+            recipe.imageUri?.let { uriString ->
+                try {
+                    val uri = Uri.parse(uriString)
+                    Glide.with(itemView.context)
+                        .load(uri)
+                        .placeholder(R.drawable.ic_recipe_placeholder)
+                        .error(R.drawable.ic_recipe_placeholder)
+                        .centerCrop()
+                        .into(recipeImageView)
+                } catch (e: Exception) {
+                    recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
+                }
+            } ?: run {
+                recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
             }
         }
     }

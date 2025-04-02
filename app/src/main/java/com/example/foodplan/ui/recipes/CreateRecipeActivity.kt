@@ -29,6 +29,7 @@ import com.example.foodplan.utils.PermissionUtils
 import kotlinx.coroutines.launch
 import androidx.activity.viewModels
 import android.util.Log
+import com.bumptech.glide.Glide
 
 class CreateRecipeActivity : AppCompatActivity() {
     private val TAG = "CreateRecipeActivity"
@@ -200,9 +201,24 @@ class CreateRecipeActivity : AppCompatActivity() {
         dinnerCheckBox.isChecked = recipe.isDinner
         snackCheckBox.isChecked = recipe.isSnack
 
-        recipe.imageUri?.let { uri ->
-            selectedImageUri = Uri.parse(uri)
-            binding.recipeImageView.setImageURI(selectedImageUri)
+        recipe.imageUri?.let { uriString ->
+            try {
+                Log.d(TAG, "Loading recipe image from URI: $uriString")
+                selectedImageUri = Uri.parse(uriString)
+                Glide.with(this)
+                    .load(selectedImageUri)
+                    .placeholder(R.drawable.ic_recipe_placeholder)
+                    .error(R.drawable.ic_recipe_placeholder)
+                    .centerCrop()
+                    .into(binding.recipeImageView)
+                Log.d(TAG, "Recipe image loaded successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading recipe image", e)
+                binding.recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
+            }
+        } ?: run {
+            Log.d(TAG, "No image URI for recipe")
+            binding.recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
         }
     }
 
@@ -275,6 +291,9 @@ class CreateRecipeActivity : AppCompatActivity() {
             val ingredients = ingredientsAdapter.getItems().filter { it.isNotBlank() }
             val instructions = instructionsAdapter.getItems().filter { it.isNotBlank() }
 
+            val imageUriString = selectedImageUri?.toString()
+            Log.d(TAG, "Saving recipe with image URI: $imageUriString")
+
             val recipe = Recipe(
                 id = recipeId,
                 name = name,
@@ -282,7 +301,7 @@ class CreateRecipeActivity : AppCompatActivity() {
                 cookingTime = cookingTime,
                 calories = calories,
                 servings = servings,
-                imageUri = selectedImageUri?.toString(),
+                imageUri = imageUriString,
                 ingredients = ingredients,
                 instructions = instructions,
                 isBreakfast = breakfastCheckBox.isChecked,

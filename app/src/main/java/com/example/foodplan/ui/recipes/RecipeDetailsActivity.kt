@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.foodplan.R
 import com.example.foodplan.model.Recipe
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -91,14 +92,31 @@ class RecipeDetailsActivity : AppCompatActivity() {
     }
 
     private fun displayRecipe(recipe: Recipe) {
+        Log.d(TAG, "Displaying recipe: ${recipe.name}")
         recipeNameTextView.text = recipe.name
         recipeDescriptionTextView.text = recipe.description
         cookingTimeTextView.text = "Время приготовления: ${recipe.cookingTime} мин"
         caloriesTextView.text = "Калории: ${recipe.calories} ккал"
         servingsTextView.text = "Порций: ${recipe.servings}"
         
-        recipe.imageUri?.let { uri ->
-            recipeImageView.setImageURI(Uri.parse(uri))
+        recipe.imageUri?.let { uriString ->
+            try {
+                Log.d(TAG, "Setting recipe image from URI: $uriString")
+                val uri = Uri.parse(uriString)
+                Glide.with(this)
+                    .load(uri)
+                    .placeholder(R.drawable.ic_recipe_placeholder)
+                    .error(R.drawable.ic_recipe_placeholder)
+                    .centerCrop()
+                    .into(recipeImageView)
+                Log.d(TAG, "Recipe image set successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error setting recipe image", e)
+                recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
+            }
+        } ?: run {
+            Log.d(TAG, "No image URI for recipe")
+            recipeImageView.setImageResource(R.drawable.ic_recipe_placeholder)
         }
         
         ingredientsAdapter.submitList(recipe.ingredients)
